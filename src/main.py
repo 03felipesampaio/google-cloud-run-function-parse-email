@@ -25,12 +25,13 @@ def parse_email_from_file(cloud_event: CloudEvent):
         uber_receipt = uber_scraper.parse_message_body(
             urlsafe_b64decode(file_content["payload"]["body"]["data"])
         )
+        # Datetime.date is not json serializable. So all dates and timestamps must be converted
+        uber_receipt['date'] = str(uber_receipt['date'])
 
         bigquery_dataset = bigquery_client.create_dataset(os.environ["BIGQUERY_DATASET_NAME"], exists_ok=True)
         bigquery_table = bigquery_client.create_table(os.environ['UBER_RECEIPTS_BIGQUERY_TABLE'], exists_ok=True)
 
         errors = bigquery_client.insert_rows_json(bigquery_table, [uber_receipt])
-        if errors == []:
-            print("New rows have been added.")
-        else:
+        
+        if errors:
             print("Encountered errors while inserting rows: {}".format(errors))
