@@ -59,8 +59,8 @@ def parse_message_body(data: str) -> dict:
     duration = int(duration)
 
     return {
-        "date": travel_date,
-        "total": total_value,
+        "ride_date": travel_date,
+        "ride_value": total_value,
         "stars": stars,
         "category": category,
         "distance": distance,
