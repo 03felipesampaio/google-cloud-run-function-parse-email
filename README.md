@@ -2,7 +2,7 @@
 
 A Google Cloud Run Function service app to execute each time a new email is uploaded to a bucket
 
-![Architecture](./docs/parse-email-function.svg.png)
+![Architecture](./docs/parse-email-function.svg)
 
 ## How it works?
 
