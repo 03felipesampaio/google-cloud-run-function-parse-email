@@ -43,3 +43,5 @@ def parse_email_from_file(cloud_event: CloudEvent):
         
         if errors:
             print("Encountered errors while inserting rows: {}".format(errors))
+        else:
+            print('Inserted:', uber_receipt)
