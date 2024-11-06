@@ -7,14 +7,19 @@ from response_file import ResponseFile
 
 
 PARSER_URL = os.getenv(
-    "BANK_STATEMENT_PARSER_DOMAIN",
+    "BANK_STATEMENT_PARSER_URL"
 )
 
 
 def parse_bill(bank: str, input_file: InputFile) -> ResponseFile:
+    params = {"output_format": "parquet"}
+
+    if bank == "inter":
+        params['password'] = os.getenv("INTER_PASSWORD")
+
     res = httpx.post(
         f"{PARSER_URL}/{bank}/bills",
-        params={"output_format": "parquet"},
+        params=params,
         files={
             "upload_file": (input_file.name, input_file.content, input_file.contentType)
         },

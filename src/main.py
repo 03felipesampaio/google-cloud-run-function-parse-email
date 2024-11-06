@@ -113,10 +113,12 @@ def parse_email_from_file(cloud_event: CloudEvent):
         print("Bill PDF file detected:", filename, bank_name)
         output_file = expenses_trackers.parse_bill(bank_name.lower(), input_file)
 
-        bucket = storage_client.get_bucket("bronze-expenses-tracker")
+        bucket = storage_client.get_bucket(os.getenv("BRONZE_FINANCE_BUCKET"))
         bucket.blob(
-            f'bills/{input_file.name.replace(".pdf", ".parquet").replace("Faturas/", "").lower()}'
+            f'bills/{output_file.name.replace(".pdf", ".parquet").replace("Faturas/", "").lower()}'
         ).upload_from_string(
             output_file.content, content_type=output_file.headers["content-type"]
         )
+
+        print("Sent file to Bronze Finance Bucket")
     
