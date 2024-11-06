@@ -115,7 +115,7 @@ def parse_email_from_file(cloud_event: CloudEvent):
 
         bucket = storage_client.get_bucket(os.getenv("BRONZE_FINANCE_BUCKET"))
         bucket.blob(
-            f'bills/{output_file.name.replace(".pdf", ".parquet").replace("Faturas/", "").lower()}'
+            f'bills/{input_file.name.replace(".pdf", ".parquet").replace("Faturas/", "").lower()}'
         ).upload_from_string(
             output_file.content, content_type=output_file.headers["content-type"]
         )

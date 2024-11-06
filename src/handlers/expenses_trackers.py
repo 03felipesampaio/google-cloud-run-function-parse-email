@@ -15,7 +15,7 @@ def parse_bill(bank: str, input_file: InputFile) -> ResponseFile:
     params = {"output_format": "parquet"}
 
     if bank == "inter":
-        params['password'] = os.getenv("INTER_PASSWORD")
+        params['file_password'] = os.getenv("INTER_PASSWORD")
 
     res = httpx.post(
         f"{PARSER_URL}/{bank}/bills",
