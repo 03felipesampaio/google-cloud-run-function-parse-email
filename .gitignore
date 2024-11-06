@@ -1,5 +1,6 @@
 emails_test/
 /_*
+env.yml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
