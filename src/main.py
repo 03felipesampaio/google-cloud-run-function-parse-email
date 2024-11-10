@@ -121,4 +121,17 @@ def parse_email_from_file(cloud_event: CloudEvent):
         )
 
         print("Sent file to Bronze Finance Bucket")
+    if filename.startswith("Extratos") and filename.endswith(".ofx"):
+        bank_name = input_file.name.split("/")[1]
+        print("Extract OFX file detected:", filename, bank_name)
+        output_file = expenses_trackers.parse_statement(bank_name.lower(), input_file)
+
+        bucket = storage_client.get_bucket(os.getenv("BRONZE_FINANCE_BUCKET"))
+        bucket.blob(
+            f'statements/{input_file.name.replace(".ofx", ".parquet").replace("Extratos/", "").lower()}'
+        ).upload_from_string(
+            output_file.content, content_type=output_file.headers["content-type"]
+        )
+
+        print("Sent file to Bronze Finance Bucket")
     
