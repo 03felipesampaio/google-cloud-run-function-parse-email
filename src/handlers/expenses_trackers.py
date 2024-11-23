@@ -38,7 +38,7 @@ def parse_statement(bank: str, input_file: InputFile) -> ResponseFile:
         f"{PARSER_URL}/{bank}/statements",
         params={"output_format": "parquet"},
         files={
-            "upload_file": (input_file.name, input_file.content, input_file.content_ype)
+            "upload_file": (input_file.name, input_file.content, input_file.content_type)
         },
         timeout=10.0
     )

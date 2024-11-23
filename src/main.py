@@ -120,6 +120,7 @@ def parse_email_from_file(cloud_event: CloudEvent):
             output_file = expenses_trackers.parse_bill(bank_name.lower(), input_file)
         except Exception as e:
             logger.error(f"Failed to parse bill '{filename}'. Error: {e}")
+            raise e
 
         bucket = storage_client.get_bucket(os.getenv("BRONZE_FINANCE_BUCKET"))
         
@@ -148,6 +149,7 @@ def parse_email_from_file(cloud_event: CloudEvent):
             output_file = expenses_trackers.parse_statement(bank_name.lower(), input_file)
         except Exception as e:
             logger.error(f"Failed to parse statement '{filename}'. Error: {e}")
+            raise e
 
         bucket = storage_client.get_bucket(os.getenv("BRONZE_FINANCE_BUCKET"))
         
