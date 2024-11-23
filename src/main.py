@@ -15,6 +15,8 @@ from base64 import urlsafe_b64decode
 import os
 import io
 
+from loguru import logger
+
 
 def read_email(file_content: io.BytesIO) -> dict:
     json_content = json.loads(file_content)
@@ -30,6 +32,8 @@ def read_email(file_content: io.BytesIO) -> dict:
 @functions_framework.cloud_event
 def parse_email_from_file(cloud_event: CloudEvent):
     storage_client = storage.Client()
+    
+    logger.info(f"{cloud_event}")
 
     input_file = InputFile(
         storage_client,
@@ -110,28 +114,57 @@ def parse_email_from_file(cloud_event: CloudEvent):
             print("Inserted:", uber_receipt)
     if filename.startswith("Faturas/") and filename.endswith(".pdf"):
         bank_name = input_file.name.split("/")[1]
-        print("Bill PDF file detected:", filename, bank_name)
-        output_file = expenses_trackers.parse_bill(bank_name.lower(), input_file)
+        logger.info(f"Parsing bill on file '{filename}' with content type '{input_file.content_type}'")
+        
+        try:
+            output_file = expenses_trackers.parse_bill(bank_name.lower(), input_file)
+        except Exception as e:
+            logger.error(f"Failed to parse bill '{filename}'. Error: {e}")
+            raise e
 
         bucket = storage_client.get_bucket(os.getenv("BRONZE_FINANCE_BUCKET"))
-        bucket.blob(
+        
+        
+        blob_output_file = bucket.blob(
             f'bills/{input_file.name.replace(".pdf", ".parquet").replace("Faturas/", "").lower()}'
-        ).upload_from_string(
+        )
+        
+        if blob_output_file.exists():
+            logger.info(f"Overwriting file '{blob_output_file.name}' at bucket '{blob_output_file.bucket.name}'")
+        else:
+            logger.info(f"Creating file '{blob_output_file.name}' at bucket '{blob_output_file.bucket.name}'")
+        
+        blob_output_file.upload_from_string(
             output_file.content, content_type=output_file.headers["content-type"]
         )
 
-        print("Sent file to Bronze Finance Bucket")
+        logger.info(f"Sent file '{blob_output_file.name}' to bucket '{blob_output_file.bucket.name}'")
+        
     if filename.startswith("Extratos") and filename.endswith(".ofx"):
         bank_name = input_file.name.split("/")[1]
-        print("Extract OFX file detected:", filename, bank_name)
-        output_file = expenses_trackers.parse_statement(bank_name.lower(), input_file)
+        
+        logger.info(f"Parsing statement on file '{filename}' with content type '{input_file.content_type}'")
+        
+        try:
+            output_file = expenses_trackers.parse_statement(bank_name.lower(), input_file)
+        except Exception as e:
+            logger.error(f"Failed to parse statement '{filename}'. Error: {e}")
+            raise e
 
         bucket = storage_client.get_bucket(os.getenv("BRONZE_FINANCE_BUCKET"))
-        bucket.blob(
+        
+        blob_output_file = bucket.blob(
             f'statements/{input_file.name.replace(".ofx", ".parquet").replace("Extratos/", "").lower()}'
-        ).upload_from_string(
+        )
+        
+        if blob_output_file.exists():
+            logger.info(f"Overwriting file '{blob_output_file.name}' at bucket '{blob_output_file.bucket.name}'")
+        else:
+            logger.info(f"Creating file '{blob_output_file.name}' at bucket '{blob_output_file.bucket.name}'")
+        
+        blob_output_file.upload_from_string(
             output_file.content, content_type=output_file.headers["content-type"]
         )
 
-        print("Sent file to Bronze Finance Bucket")
+        logger.info(f"Sent file '{blob_output_file.name}' to bucket '{blob_output_file.bucket.name}'")
     
